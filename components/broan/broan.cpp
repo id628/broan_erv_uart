@@ -361,19 +361,11 @@ void BroanComponent::parseBroanFields(const std::vector<uint8_t>& message)
 			case BroanField::TemperatureA:
 			case BroanField::TemperatureB:
 			{
-				// @todo: We should stop querying NaN fields...
-				if( std::isnan( pField->m_value.m_flValue ) )
-					break;
-
-				if( m_nTemperatureId == 0xFF )
-					m_nTemperatureId = pField->m_nOpcodeHigh;
-
-				if( m_nTemperatureId != pField->m_nOpcodeHigh )
-				{
-					ESP_LOGW("broan","Got report on two different temperature sensors... this needs a code fix! (saw %02X and %02X)", pField->m_nOpcodeHigh, m_nTemperatureId);
-					break;
-				}
-				temperature_sensor_->publish_state(pField->m_value.m_flValue);
+			  // Some Broan models (e.g., B160E75RS) report multiple temperature IDs.
+			  // Until we add proper mapping, ignore temperature fields so the rest works.
+			  // (We still parse and store the raw field value above; we simply don't validate
+			  //  the sensor ID or publish a temperature.)
+			  break;
 			}
 			break;
 		}
